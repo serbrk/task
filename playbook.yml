@@ -1,0 +1,34 @@
+---
+- name: install nginx
+  hosts: webservers
+  become: yes
+
+  vars:
+    source_folder: ./webserv
+    destin_folder: /var/www/html
+
+
+  tasks:
+
+  - name: install nginx
+    apt: name=nginx state=latest
+  - name: start nginx service
+    service: name=nginx state=started enabled=yes
+  - name: Make site from config
+    template: src={{ source_folder }}/index.j2 dest={{ destin_folder }}/index.html
+
+- name: install haproxy
+  hosts: loadbalansers
+  become: yes
+
+  vars:
+   source_folder: ./ha
+   destin_folder: /etc/haproxy
+  tasks:
+
+  - name: install haproxy
+    yum: name=haproxy state=latest
+  - name: start haproxy
+    service: name=haproxy state=started enabled=yes
+  - name: install config
+    template: src={{ source_folder  }}/ha.j2 dest={{ destin_folder  }}/haproxy.cfg
